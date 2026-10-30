@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Food Network | Access Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif;}
+body {
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:url('https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center/cover;
+    position:relative;
+    overflow:hidden;
+}
+body::before {
+    content:'';
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(10,20,15,0.6);
+    z-index:1;
+}
+.auth-container {
+    position: relative;
+    z-index:2;
+    width:450px;
+    background: rgba(20,40,20,0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:20px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5);
+    padding:30px;
+    color:#fff;
+    overflow:hidden;
+    transition:height 0.4s ease;
+}
+.header { text-align:center; margin-bottom:25px; }
+.header h1 { font-size:24px; color:#4ade80; font-weight:600; }
+.header p { font-size:13px; color:#ccc; }
+.tabs { display:flex; margin-bottom:25px; background: rgba(0,0,0,0.2); border-radius:30px; position:relative; }
+.tab-btn { flex:1; padding:10px; text-align:center; cursor:pointer; z-index:2; font-weight:500; color:#aaa; transition:0.3s;}
+.tab-btn.active{color:#fff;}
+.tab-slider { position:absolute; top:0; left:0; width:50%; height:100%; background:#22c55e; border-radius:30px; transition:0.4s cubic-bezier(0.4,0,0.2,1); z-index:1; }
+.form-wrapper { position: relative; width:100%; }
+form { width:100%; transition:all 0.4s ease-in-out; }
+#loginForm { display:block; }
+#registerForm { display:none; max-height:400px; overflow-y:auto; padding-right:5px; }
+#registerForm::-webkit-scrollbar { width:6px; }
+#registerForm::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius:10px;}
+#registerForm::-webkit-scrollbar-thumb { background: rgba(74,222,128,0.5); border-radius:10px;}
+.input-group { margin-bottom:15px; }
+input, select, textarea {
+    width:100%; padding:12px 15px; background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#fff; font-size:14px; outline:none; transition:0.3s;
+}
+textarea { resize:none; height:80px; }
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.5); }
+select option { background:#112211; color:#fff; }
+input:focus, select:focus, textarea:focus { background: rgba(255,255,255,0.15); border-color:#4ade80; box-shadow:0 0 10px rgba(74,222,128,0.2);}
+.file-upload-wrapper { margin-bottom:15px; }
+.file-upload-label { display:flex; align-items:center; justify-content:center; width:100%; padding:12px; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.4); border-radius:10px; cursor:pointer; color:#aaa; font-size:14px; transition:0.3s; }
+.file-upload-label:hover { border-color:#4ade80; color:#4ade80;}
+input[type="file"] { display:none; }
+button[type="submit"] {
+    width:100%; padding:12px; background:linear-gradient(45deg,#16a34a,#4ade80);
+    border:none; border-radius:10px; color:white; font-size:16px; font-weight:600; cursor:pointer; margin-top:10px; transition:0.3s; box-shadow:0 4px 15px rgba(34,197,94,0.3);
+}
+button[type="submit"]:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(34,197,94,0.5);}
+</style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="header">
+        <h1>Global Food Network</h1>
+        <p>Connect. Donate. Redistribute.</p>
+    </div>
+
+    <div class="tabs">
+        <div class="tab-btn active" onclick="switchTab('login')">Login</div>
+        <div class="tab-btn" onclick="switchTab('register')">Register</div>
+        <div class="tab-slider" id="tabSlider"></div>
+    </div>
+
+    <div class="form-wrapper">
+        <form id="loginForm" onsubmit="loginUser(event)">
+            <div class="input-group">
+                <input type="text" id="loginIdentifier" placeholder="Email ID or Mobile Number" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="loginPassword" placeholder="Password" required>
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+
+        <form id="registerForm" onsubmit="registerUser(event)">
+            <div class="input-group">
+                <input type="text" id="regName" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <input type="email" id="regEmail" placeholder="Email ID" required>
+            </div>
+            <div class="input-group">
+                <input type="tel" id="regMobile" placeholder="Mobile Number" required>
+            </div>
+            <div class="input-group">
+                <textarea id="regAddress" placeholder="Full Address" required></textarea>
+            </div>
+            <div class="input-group">
+                <input type="number" id="regPin" placeholder="Pin Code" required>
+            </div>
+            
+            <div class="file-upload-wrapper">
+                <label for="regPhoto" class="file-upload-label" id="photoLabel">
+                    📷 Upload Profile Photo
+                </label>
+                <input type="file" id="regPhoto" accept="image/*" onchange="updateFileName()">
+            </div>
+
+            <div class="input-group">
+                <select id="regRole" required>
+                    <option value="" disabled selected hidden>Select Role</option>
+                    <option value="donater">Donater</option>
+                    <option value="ngo">NGO (Engio)</option>
+                    <option value="organization">Organization</option>
+                    <option value="user">Standard User</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <input type="password" id="regPassword" placeholder="Create Password" required>
+            </div>
+            <button type="submit">Create Account</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Tab switcher
+function switchTab(tab){
+    const loginForm=document.getElementById('loginForm');
+    const registerForm=document.getElementById('registerForm');
+    const slider=document.getElementById('tabSlider');
+    const btns=document.querySelectorAll('.tab-btn');
+    if(tab==='register'){
+        slider.style.left='50%';
+        btns[0].classList.remove('active'); btns[1].classList.add('active');
+        loginForm.style.display='none'; registerForm.style.display='block';
+    }else{
+        slider.style.left='0%';
+        btns[1].classList.remove('active'); btns[0].classList.add('active');
+        registerForm.style.display='none'; loginForm.style.display='block';
+    }
+}
+
+// File upload label
+function updateFileName(){
+    const fileInput=document.getElementById('regPhoto');
+    const label=document.getElementById('photoLabel');
+    if(fileInput.files.length>0){
+        label.innerText="✅ "+fileInput.files[0].name;
+        label.style.borderColor="#4ade80";
+        label.style.color="#4ade80";
+    }
+}
+
+// Register user
+async function registerUser(e){
+    e.preventDefault();
+    const formData=new FormData();
+    formData.append("name",document.getElementById('regName').value);
+    formData.append("email",document.getElementById('regEmail').value);
+    formData.append("mobile",document.getElementById('regMobile').value);
+    formData.append("address",document.getElementById('regAddress').value);
+    formData.append("pincode",document.getElementById('regPin').value);
+    formData.append("role",document.getElementById('regRole').value);
+    formData.append("password",document.getElementById('regPassword').value);
+    const photoFile=document.getElementById('regPhoto').files[0];
+    if(photoFile) formData.append("photo",photoFile);
+
+    try{
+        const res=await fetch("http://localhost:5000/register",{method:"POST", body:formData});
+        const data=await res.json();
+        alert(data.message);
+        if(res.ok) switchTab('login');
+    }catch(err){ console.error(err); alert("Failed to connect to server."); }
+}
+
+// Login user
+async function loginUser(e){
+    e.preventDefault();
+    const identifier=document.getElementById('loginIdentifier').value;
+    const password=document.getElementById('loginPassword').value;
+    try{
+        const res=await fetch("http://localhost:5000/login",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({identifier,password})
+        });
+        const data=await res.json();
+        if(res.ok){
+            // Save current user
+            localStorage.setItem("currentUser", JSON.stringify(data.user));
+
+            // 🔹 REDIRECT ALL USERS TO DASHBOARD ONLY
+            window.location.href="dashboard.html";
+        }else{ alert(data.message||"Login failed"); }
+    }catch(err){ console.error(err); alert("Failed to connect to server."); }
+}
+</script>
+</body>
+</html>
